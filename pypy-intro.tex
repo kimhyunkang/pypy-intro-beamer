@@ -156,8 +156,8 @@
   \begin{figure}
   \begin{tikzpicture}[node distance=3cm, auto,>=latex', thick]
     \path[->] node[format] (pypy) {pypy source}
-              node[format, below of=pypy] (pypyc) {translated C code}
-              node[format, below of=pypyc] (runtime) {pypy runtime}
+              node[format, below of=pypy, node distance=1.5cm] (pypyc) {translated C code}
+              node[format, below of=pypyc, node distance=1.5cm] (runtime) {pypy runtime}
               (pypy) edge node {RPython Compiler} (pypyc)
               (pypyc) edge node {GCC} (runtime);
   \end{tikzpicture}
