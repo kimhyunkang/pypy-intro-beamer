@@ -6,7 +6,14 @@
 \usepackage{beamerthemeGoettingen}
 \usepackage{beamercolorthemebeaver}
 
+\usepackage{tikz}
+
+\usetikzlibrary{arrows,shapes}
+
 \usepackage{graphicx}
+
+\tikzstyle{format} = [draw, thin, fill=blue!20]
+\tikzstyle{medium} = [ellipse, draw, thin, fill=green!20, minimum height=2.5em]
 
 \addtobeamertemplate{block begin}{}{\setlength{\parskip}{35pt plus 1pt minus 1pt}}
 
@@ -138,9 +145,23 @@
   \begin{itemize}
   \item 컴파일 시 각 변수의 타입을 분석하여 그에 해당하는 C 타입으로 번역됩니다
   \item 인터프리터의 소스코드는 Python이지만, 실제로는 C 언어를 거쳐 다시 어셈블리로 번역되므로 인터프리터의 실행속도는 빠릅니다
-  \item C외에 JVM이나 .net 바이트코드로 번역할 수도 있습니다
-  \item 이 경우 JVM이나 .net에서 Python을 실행할 수 있습니다
   \end{itemize}
+\end{slide}
+}
+
+\frame{
+\begin{slide}
+\frametitle{PyPy가 빠른 이유 1 - RPython}
+
+  \begin{figure}
+  \begin{tikzpicture}[node distance=3cm, auto,>=latex', thick]
+    \path[->] node[format] (pypy) {pypy source}
+              node[format, below of=pypy] (pypyc) {translated C code}
+              node[format, below of=pypyc] (runtime) {pypy runtime}
+              (pypy) edge node {RPython Compiler} (pypyc)
+              (pypyc) edge node {GCC} (runtime);
+  \end{tikzpicture}
+  \end{figure}
 \end{slide}
 }
 
