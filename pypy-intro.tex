@@ -379,13 +379,16 @@
 \begin{frame}[fragile]
 \begin{slide}
 \frametitle{PyPy의 미래}
-  STM: Software Transactional Memory
+  Transactional Memory
   \begin{itemize}
     \item 모든 변수 접근이 Transaction으로 구현됨
     \item lock을 걸지 않고 낙관적으로 작업을 수행한 후, 충돌이 발견되면 되돌림
-    \item 소프트웨어적으로 이를 구현하여 Global Interpreter Lock을 제거할 계획이라고 합니다
+    \item 차세대 Intel architecture인 Haswell에서 하드웨어적으로 구현될 예정
+  \end{itemize}
+  PyPy-STM (Software Transactional Memory)
+  \begin{itemize}
+    \item 소프트웨어적으로 Transactional Memory를 구현하여 Global Interpreter Lock을 제거할 계획이라고 합니다
     \item 현재 구현중 - 아직 버그가 많다고 합니다
-    \item STM은 차세대 intel architecture에서 하드웨어적으로 구현될 예정
   \end{itemize}
 
 %% \begin{verbatim}
