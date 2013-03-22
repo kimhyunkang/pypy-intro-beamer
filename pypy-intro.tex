@@ -64,8 +64,34 @@
     \begin{itemize}
     \item Multi-thread 환경에서는 GIL이 없는 Jython이 더 빠를때도 있습니다
     \end{itemize}
+  \item 현재 EU의 재정적 지원을 받아 개발중입니다
   \end{itemize}
 
+\end{slide}
+}
+
+\section{Why PyPy?}
+\frame{
+\begin{slide}
+\frametitle{PyPy에 관심을 갖게 된 이유}
+  \begin{itemize}
+  \item 빠릅니다
+    \begin{itemize}
+    \item 평균 5배 가량 성능이 향상된다고 합니다
+    \end{itemize}
+  \item 호환성을 중요하게 생각합니다
+    \begin{itemize}
+    \item 순수 파이썬 코드일 경우 거의 코드 변경 없이 PyPy를 도입할 수 있습니다
+    \end{itemize}
+  \item 소프트웨어를 어떻게 최적화해야 하는가에 관해 배울 수 있습니다
+    \begin{itemize}
+    \item 동적 언어로 만든 구현체를 정적 언어보다 빠르게 최적화하기 위해 도입한 여러 테크닉을 살펴볼 수 있습니다
+    \end{itemize}
+  \item 파이썬 언어 그 자체에 대해 배울 수 있습니다
+    \begin{itemize}
+    \item CPython과 PyPy의 비교를 통해 각 구현체의 내부에 대해 배울 수 있습니다
+    \end{itemize}
+  \end{itemize}
 \end{slide}
 }
 
@@ -74,9 +100,9 @@
 \begin{slide}
 \frametitle{Bootstrapping}
 
-  대상 언어로 대상 언어의 컴파일러/인터프리터를 짜는 테크닉을 bootstrapping이라고 합니다
-
-  예
+  대상 언어로 대상 언어의 컴파일러/인터프리터를 짜는 것을 bootstrapping이라고 합니다
+  \\~\\
+  Bootstrapping은 컴파일러가 복잡할수록 유용한 테크닉입니다
   \begin{itemize}
   \item GCC (C)
   \item Microsoft Visual C++
@@ -95,11 +121,15 @@
   \item 컴파일러를 잘 만들기 위해 다른 언어를 잘 알 필요가 없습니다
   \item 다른 아키텍처로 포팅하기가 쉽습니다
   \item 컴파일러가 최적화된 코드를 만들면 런타임뿐만 아니라 컴파일 속도가 함께 빨라집니다
+    \begin{itemize}
+    \item PyPy는 인터프리터이므로 해당되지 않습니다
+    \end{itemize}
   \item 일반적으로 더 낮은 레벨의 언어로 컴파일러를 작성하게 되므로 컴파일러는 복잡해지기 쉽지만, bootstrapping 컴파일러는 대상 언어와 구현 언어가 같은 언어이므로 더 복잡한 기능을 쉽게 구현할 수 있습니다
   \end{itemize}
 \end{slide}
 }
 
+\section{PyPy의 장점}
 \frame{
 \begin{slide}
 \frametitle{PyPy의 장점}
@@ -146,6 +176,13 @@
   \item 컴파일 시 각 변수의 타입을 분석하여 그에 해당하는 C 타입으로 번역됩니다
   \item 인터프리터의 소스코드는 Python이지만, 실제로는 C 언어를 거쳐 다시 어셈블리로 번역되므로 인터프리터의 실행속도는 빠릅니다
   \end{itemize}
+  RPython
+  \begin{itemize}
+  \item PyPy를 제작하기 위해 만든 Python 언어의 부분집합
+  \item 한 변수에 여러개의 타입을 가진 변수를 할당할 수 없습니다
+  \item \textbf{os}, \textbf{sys} 등 일부 라이브러리만 사용할 수 있습니다
+  \item RPython Compiler는 타입 추론 알고리즘을 거쳐 이 소스코드를 C 언어로 번역합니다
+  \end{itemize}
 \end{slide}
 }
 
@@ -169,14 +206,16 @@
 \frame{
 \begin{slide}
 \frametitle{PyPy가 빠른 이유 2 - JIT Compilation}
-  CPython은 코드 줄마다 여러가지 체크를 수행합니다 
+  CPython은 코드 줄마다 여러가지 체크를 수행합니다
+  \\~\\
+  인터프리터가 \textbf{a+b} 를 실행할 때 일어나는 일
   \begin{itemize}
-  \item 인터프리터가 \textbf{a+b} 를 실행할 때 일어나는 일
   \item 오브젝트 \textbf{a}가 \textbf{\_\_add\_\_} 연산자를 갖고 있는지 검사합니다
   \item 없을 경우 \textbf{b}가 \textbf{\_\_radd\_\_} 연산자를 갖고 있는지 검사합니다
   \item 둘 중에 하나가 있다면, 두 값의 타입을 검사하여 coercion을 수행합니다
   \item 실제 덧셈이 수행됩니다
   \end{itemize}
+  이와같은 오버헤드가 쌓여 전체 성능을 저하시키게 됩니다
 \end{slide}
 }
 
@@ -185,9 +224,28 @@
 \frametitle{PyPy가 빠른 이유 2 - JIT Compilation}
   PyPy는 파이썬 코드를 실행할 때 일부 코드를 기계어로 실시간 번역합니다
   \begin{itemize}
-  \item 이런 테크닉을 Just-in-time 컴파일이라고 하며, Java VM이 빠른 이유이기도 합니다
+  \item 이런 테크닉을 Just-in-time 컴파일이라고 합니다
   \item 모든 코드를 기계어로 번역하는 것은 실행시간보다 컴파일 시간이 오래 걸리므로 낭비입니다
   \item 루프 내의 코드나 자주 호출되는 함수가 나타나면 기계어로 번역합니다
+  \end{itemize}
+  JIT는 잘 알려진 테크닉이며, 여러 가상머신에서 사용되고 있습니다
+  \begin{itemize}
+  \item JVM
+  \item .NET
+  \item LLVM(Objective C, clang)
+  \item V8(Google Chrome)
+  \end{itemize}
+\end{slide}
+}
+
+\frame{
+\begin{slide}
+\frametitle{PyPy가 빠른 이유 2 - Tracing JIT}
+  PyPy의 JIT는 한단계 더 나아가, 실행중에 문법을 실시간 분석하여 사용되지 않는 조건분기 등을 기계어 코드에서 제거합니다
+  \begin{itemize}
+  \item 이런 테크닉을 Tracing JIT라고 합니다
+  \item Mozilla Firefox의 Javascript Engine인 TraceMonkey에서도 유사한 테크닉이 사용됩니다
+  \item CPU가 실시간으로 수행하고 있는 것과 비슷한 일이지만, PyPy는 소스코드를 분석하므로 최적화를 더 잘 수행할 수 있습니다
   \end{itemize}
 \end{slide}
 }
@@ -196,7 +254,7 @@
 \frame{
 \begin{slide}
 \frametitle{PyPy가 빠른 이유 3 - Garbage Collector}
-  CPython은 reference-count로 메모리를 관리합니다
+  CPython은 reference count 로 메모리를 관리합니다
   \begin{itemize}
   \item 모든 CPython 변수에는 몇개의 변수가 자기 자신을 가리키고 있는지 추적하는 값이 붙어 있으며, 이 숫자가 0이 될때 메모리에서 해제합니다
   \item 따라서, 모든 변수가 메모리를 4바이트씩 더 사용합니다
@@ -205,6 +263,7 @@
     \item 이를 막기 위해 cycle detector를 따로 실행합니다
     \end{itemize}
   \item 또한, 변수 해제시마다 연결된 모든 메모리에 접근하여 count를 감소시켜야 하므로, cache 성능이 떨어집니다
+  \item 병렬로 구현하기 어렵습니다
   \end{itemize}
 \end{slide}
 }
@@ -212,13 +271,30 @@
 \frame{
 \begin{slide}
 \frametitle{PyPy가 빠른 이유 3 - Garbage Collector}
-  반면 PyPy는 주기적으로 한 변수가 다른 변수를 가리키는 포인터를 모두 추적한 후 쓰이지 않는 메모리를 모아 해제합니다
+  PyPy는 주기적으로 한 변수가 다른 변수를 가리키는 포인터를 모두 추적한 후 쓰이지 않는 메모리를 모아 해제합니다
+  \\~\\
+  이런 테크닉을 Tracing Garbage Collection이라고 합니다
+  \\~\\
+  장점
+  \begin{itemize}
+  \item 실제 사용하는 메모리 외에 추가로 사용하는 메모리가 적습니다
+  \item 서로 연결된 메모리를 추적하는 것이 아니라 메모리 주소 순서대로 추적하므로 CPU cache를 잘 활용합니다
+  \item 메인 스레드와 독립적으로 병렬로 실행 가능합니다 (PyPy의 구현은 아직 메인 스레드에서 동작합니다)
+  \end{itemize}
+\end{slide}
+}
+
+\frame{
+\begin{slide}
+\frametitle{PyPy가 빠른 이유 3 - Garbage Collector}
+  PyPy는 Generational Tracing GC를 사용합니다
   \begin{itemize}
   \item 오랫동안 해제되지 않는 변수들과 자주 할당되고 해제되는 변수를 구분하여 서로 다른 블록에 할당합니다
-  \item 변수들을 수명 주기별로 모아 같은 블록으로 관리하며, 해제할때는 큰 블록을 한번에 OS에 반환합니다
+  \item 수명 주기가 오래된 변수는 주기적으로 더 오래된 블록들로 이동시킵니다
+  \item 변수들을 수명 주기별로 모아 같은 블록으로 관리하며, 해제할때는 큰 블록을 한번에 OS에 반환하므로, 할당 및 해제의 오버헤드가 적습니다
   \end{itemize}
 
-  잘 최적화된 Generational GC는 대부분의 경우 Reference-Counting보다 효율적이라는 것이 여러 runtime(특히 JRE)에서 증명되어 있습니다
+  잘 최적화된 Generational GC는 대부분의 경우 Reference Counting 보다 효율적이라는 것이 여러 가상머신에서 증명되어 있습니다
 \end{slide}
 }
 
@@ -266,6 +342,13 @@
     \item \textbf{setattr()} 및 \textbf{getattr()}
     \item \textbf{*args} 및 \textbf{**kwargs}
     \item \textbf{sys.\_getframe()}, \textbf{sys.exc\_info()}
+    \item \textbf{sys.exc\_info()}
+      \begin{itemize}
+      \item PyPy JIT에는 stack frame을 일부 제거하는 코드가 포함되어 있습니다
+      \item \textbf{sys.exc\_info()} 함수는 호출 스택 정보를 반환해야 합니다
+      \item 따라서, 이 함수를 사용하는 코드가 보이면 JIT는 주변 stack frame 최적화를 하지 않습니다
+      \item \textbf{sys.exc\_info()}는 로깅 관련 함수에서 자주 사용됩니다
+      \end{itemize}
   \end{itemize}
 \end{slide}
 }
@@ -276,36 +359,50 @@
 \frametitle{PyPy의 약점 3 - 아직 최적화가 덜된 영역}
   다음 기능은 PyPy가 아직 충분히 성숙하지 못해 최적화가 덜된 영역으로, 앞으로 개선될 것이라고 합니다
   \begin{itemize}
-    \item 매우 큰 \textbf{dict}: GC 구현 상의 문제로 느리다고 합니다
-    \item \textbf{generator} 및 \textbf{itertools}
+    \item 매우 큰 \textbf{dict}
+      \begin{itemize}
+      \item GC 구현 상의 문제로 느리다고 합니다
+      \end{itemize}
+    \item \textbf{generator}
+      \begin{itemize}
+      \item 최근 버전에서 약간 개선되었습니다
+      \end{itemize}
+    \item \textbf{filter}, \textbf{reduce} 등 iterator 관련 함수들
+      \begin{itemize}
+      \item 이 함수들은 CPython에서도 \textbf{for} 루프에 비해 느립니다. PyPy에서도 마찬가지입니다.
+      \end{itemize}
   \end{itemize}
 \end{slide}
 }
 
 \section{PyPy의 미래}
-\subsection{멀티스레드}
-\frame{
+\begin{frame}[fragile]
 \begin{slide}
-\frametitle{PyPy의 미래 - 멀티스레딩}
+\frametitle{PyPy의 미래}
   STM: Software Transactional Memory
   \begin{itemize}
-    \item 모든 변수 접근이 Transaction으로 구현되어, 사용자가 명시적 lock을 걸 필요가 없는 구조
+    \item 모든 변수 접근이 Transaction으로 구현됨
+    \item lock을 걸지 않고 낙관적으로 작업을 수행한 후, 충돌이 발견되면 되돌림
     \item 소프트웨어적으로 이를 구현하여 Global Interpreter Lock을 제거할 계획이라고 합니다
-    \item 현재 알파 단계
+    \item 현재 구현중 - 아직 버그가 많다고 합니다
     \item STM은 차세대 intel architecture에서 하드웨어적으로 구현될 예정
   \end{itemize}
 
+%% \begin{verbatim}
+%% with atomic:
+%%     do something
+%% \end{verbatim}
+\end{slide}
+\end{frame}
+
+\frame{
+\begin{slide}
+\frametitle{PyPy의 미래}
   병렬 Garbage Collector
   \begin{itemize}
   \item 현재 GC는 싱글 스레드로 구현되어 있으며, 향후 멀티스레드 GC가 계획되어 있습니다
   \end{itemize}
-\end{slide}
-}
 
-\subsection{CPU 지원}
-\frame{
-\begin{slide}
-\frametitle{PyPy의 미래}
   다양한 CPU 지원
   \begin{itemize}
     \item 현재는 Intel CPU만 지원합니다
