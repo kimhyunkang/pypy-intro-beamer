@@ -319,7 +319,7 @@
 \frametitle{PyPy의 약점 2 - JIT가 최적화하지 못하는 코드}
   PyPy의 성능은 대부분 JIT에서 오며, JIT가 최적화하지 못하는 코드의 경우 CPython보다 느립니다
   \begin{itemize}
-  \item 모듈 코드의 대부분이 C에서 동작할 경우, CPython이 더 빠릅니다
+  \item 모듈 코드의 대부분이 C에서 동작할 경우, CPython과 속도가 비슷합니다
     \begin{itemize}
     \item 예: \textbf{sqlite3}, \textbf{cProfile}, \textbf{cPickle}
     \end{itemize}
